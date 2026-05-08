@@ -122,21 +122,21 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5">
         {statConfig.map((stat, idx) => (
           <Link
             key={idx}
             to={stat.link || '#'}
-            className={`relative overflow-hidden bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.highlight ? 'ring-2 ring-amber-400/50' : ''}`}
+            className={`group relative overflow-hidden bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.highlight ? 'ring-2 ring-amber-400/50 ring-offset-2' : ''}`}
           >
-            <div className={`absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br ${stat.color} rounded-full opacity-10`}></div>
+            <div className={`absolute -right-5 -top-5 w-28 h-28 bg-gradient-to-br ${stat.color} rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-300`}></div>
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
                   <p className="text-[10px] text-slate-400 mt-0.5">{stat.desc}</p>
                 </div>
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg shadow-slate-200`}>
+                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg shadow-slate-200 group-hover:scale-110 transition-transform duration-300`}>
                   <stat.icon className="w-4 h-4 text-white" />
                 </div>
               </div>

@@ -5,16 +5,16 @@ services:
     container_name: planillas-postgres
     environment:
       POSTGRES_USER: planillas
-      POSTGRES_PASSWORD: planillas123
-      POSTGRES_DB: planillas_db
+      POSTGRES_PASSWORD: planillas2024
+      POSTGRES_DB: planillas
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U planillas"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -24,12 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: planillas-backend
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=planillas
-      - DB_PASSWORD=planillas123
-      - DB_NAME=planillas_db
-      - PORT=8080
+      - DATABASE_URL=postgres://planillas:planillas2024@postgres:5432/planillas?sslmode=disable
     ports:
       - "8080:8080"
     depends_on:
@@ -37,26 +32,32 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: planillas-frontend
-    environment:
-      - VITE_API_URL=http://localhost:8080
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-    restart: unless-stopped
-
   python-excel:
     build:
       context: ./python-excel
       dockerfile: Dockerfile
     container_name: planillas-python
+    volumes:
+      - ./uploads:/app/uploads
+      - ./python-excel:/app
     ports:
-      - "8000:8000"
+      - "8081:8081"
+    environment:
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: planillas-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+      - python-excel
     restart: unless-stopped
 
 volumes:

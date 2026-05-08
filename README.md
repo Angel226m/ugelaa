@@ -1,5 +1,12 @@
 # Sistema de Gestión de Planillas - SU
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/PostgreSQL-18-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Docker-✓-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+</p>
+
 Sistema web completo para la gestión de planillas de personal, permisos, ingresos y descuentos.
 
 ## Tabla de Contenidos
@@ -14,7 +21,11 @@ Sistema web completo para la gestión de planillas de personal, permisos, ingres
 - [API Endpoints](#api-endpoints)
 - [Desarrollo Local](#desarrollo-local)
 - [Comandos Docker](#comandos-docker)
+- [Funcionalidades Destacadas](#funcionalidades-destacadas)
+- [Mejoras Recientes](#mejoras-recientes)
 - [Solución de Problemas](#solución-de-problemas)
+- [Roadmap](#roadmap)
+- [Licencia](#licencia)
 
 ---
 
@@ -345,6 +356,79 @@ docker exec -it planillas-postgres psql -U planillas
 docker compose down -v
 docker compose up -d --build
 ```
+
+---
+
+## Funcionalidades Destacadas
+
+### Gestión de Personal
+- **Registro completo** de empleados con DNI, nombres, apellidos, puesto, RD y UU
+- **Búsqueda inteligente** con debounce de 400ms para mejor rendimiento
+- **Filtros por estado** (Activos/Inactivos) con contadores en tiempo real
+- **Paginación avanzada** con navegación a primera/última página
+
+### Gestión de Planillas
+- **Creación masiva** de planillas por período (mes/año)
+- **Detalle completo** con modal profesional mostrando haberes y descuentos
+- **Edición inline** de conceptos y montos directamente en la planilla
+- **Cálculo automático** del líquido al instante
+- **Búsqueda por empleado** integrada con debounce
+
+### Importación Excel
+- **Drag & Drop** para subir archivos Excel (.xlsx, .xls)
+- **Procesamiento inteligente** que identifica empleados por DNI o nombre
+- **Validación de estructura** antes de importar
+- **Reporte de errores** detallado con advertencias
+
+### Dashboard
+- **Métricas visuales** con tarjetas animadas
+- **Acciones rápidas** para navegación fluida
+- **Resumen del mes** con últimas planillas procesadas
+
+---
+
+## Mejoras Recientes
+
+### v2.0.0 - UI Profesional
+- [x] Modal de Ver Detalle con diseño moderno y profesional
+- [x] Modal de Editar Planilla con validación en tiempo real
+- [x] Búsqueda con debounce (400ms) para optimizar requests
+- [x] Paginación mejorada con botones de primera/última página
+- [x] Indicador de carga en tiempo real durante búsqueda
+- [x] Filtros por estado con badges de conteo
+- [x] Animaciones y transiciones suaves
+- [x] Mejor responsive design
+
+### v1.5.0 - Experiencia de Usuario
+- [x] Sidebar colapsable para más espacio de trabajo
+- [x] Estados de carga tipo skeleton
+- [x] Empty states con llamadas a acción
+- [x] Confirmación antes de eliminar registros
+- [x] Tooltips descriptivos en iconos
+
+---
+
+## Roadmap
+
+### Funcionalidades Planificadas
+- [ ] **Reportes PDF** - Exportar planillas a PDF profesional
+- [ ] **Gráficos interactivos** - Dashboard con Chart.js/Recharts
+- [ ] **Notificaciones push** - Alertas por email/SMS
+- [ ] **Roles y permisos** - Sistema multiusuario con niveles de acceso
+- [ ] **API REST completa** - Documentación con Swagger/OpenAPI
+- [ ] **Backup automático** - Programación de respaldos de BD
+- [ ] **Auditoría** - Log de cambios en registros sensibles
+- [ ] **Importación avanzada** - Template configurable y preview
+- [ ] **Filtros avanzados** - Por rango de fechas, montos, puestos
+- [ ] **Movil PWA** - App instalable para dispositivos móviles
+
+### Mejoras Técnicas
+- [ ] Implementar Redis para caché de queries frecuentes
+- [ ] WebSocket para actualizaciones en tiempo real
+- [ ] Migrar a Next.js para SSR y mejor SEO
+- [ ] Tests unitarios con coverage > 80%
+- [ ] CI/CD con GitHub Actions
+- [ ] Monitoreo con Prometheus + Grafana
 
 ---
 

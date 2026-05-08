@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { planillasApi, personalApi } from '../services/api'
-import { Plus, Trash2, X, Eye, FileSpreadsheet, DollarSign, ArrowDownToLine, ArrowUpFromLine, User, Calendar, Download, ChevronLeft, ChevronRight, Search, Loader2, Pencil } from 'lucide-react'
+import { Plus, Trash2, X, Eye, FileSpreadsheet, DollarSign, ArrowDownToLine, ArrowUpFromLine, User, Calendar, Download, ChevronLeft, ChevronRight, Search, Loader2, Pencil, AlertCircle, Check, Clock, BadgeDollarSign, TrendingUp, Receipt, Filter, RotateCcw } from 'lucide-react'
 
 interface Personal {
   id: number
@@ -55,6 +55,7 @@ export default function Planillas() {
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
   const [searchEmpleado, setSearchEmpleado] = useState('')
   const [searchResults, setSearchResults] = useState<Personal[]>([])
@@ -64,8 +65,16 @@ export default function Planillas() {
   const [newEmpleadoForm, setNewEmpleadoForm] = useState({ dni: '', nombres: '', apellidos: '' })
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+      setPage(1)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  useEffect(() => {
     loadData()
-  }, [mes, anio, page, searchTerm])
+  }, [mes, anio, page, debouncedSearch])
 
   const loadData = () => {
     setLoading(true)
@@ -357,22 +366,27 @@ export default function Planillas() {
                 {ANIOS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>
-            <div className="relative flex-1 max-w-xs">
+            <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar empleado..."
-                className="input py-2 pl-9 pr-8 text-sm w-full"
+                className="input py-2 pl-9 pr-10 text-sm w-full"
                 value={searchTerm}
-                onChange={e => { setSearchTerm(e.target.value); setPage(1) }}
+                onChange={e => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
                 <button
                   onClick={() => { setSearchTerm(''); setPage(1) }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg transition-all"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-4 h-4" />
                 </button>
+              )}
+              {searchTerm !== debouncedSearch && (
+                <div className="absolute right-8 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-4 h-4 text-cyan-500 animate-spin" />
+                </div>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -500,27 +514,37 @@ export default function Planillas() {
               </tbody>
             </table>
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50">
                 <span className="text-xs text-slate-500">
-                  Mostrando {(page - 1) * 20 + 1} - {Math.min(page * 20, total)} de {total}
+                  Mostrando <span className="font-semibold text-slate-700">{(page - 1) * 20 + 1}</span> - <span className="font-semibold text-slate-700">{Math.min(page * 20, total)}</span> de <span className="font-semibold text-cyan-600">{total}</span> planillas
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                    className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-500 transition-all"
+                    title="Primera página"
+                  >
+                    <ChevronLeft className="w-4 h-4" /><ChevronLeft className="w-3 h-3 -ml-2" />
+                  </button>
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50"
+                    className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition-all"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = i + 1
+                    const start = Math.max(1, page - Math.floor(5/2))
+                    const pageNum = start + i
+                    if (pageNum > totalPages) return null
                     return (
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                        className={`w-9 h-9 rounded-lg text-xs font-semibold transition-all ${
                           page === pageNum
-                            ? 'bg-cyan-500 text-white'
+                            ? 'bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-md shadow-cyan-500/30'
                             : 'hover:bg-slate-100 text-slate-600'
                         }`}
                       >
@@ -531,9 +555,17 @@ export default function Planillas() {
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50"
+                    className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition-all"
                   >
                     <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                    className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-500 transition-all"
+                    title="Última página"
+                  >
+                    <ChevronRight className="w-4 h-4" /><ChevronRight className="w-3 h-3 -ml-2" />
                   </button>
                 </div>
               </div>
@@ -709,135 +741,236 @@ export default function Planillas() {
 
       {showDetail && detailPlanilla && (
         <div className="modal-overlay" onClick={() => setShowDetail(false)}>
-          <div className="modal-content w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-900">
+          <div className="modal-content w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-xl shadow-cyan-500/30 relative">
                     {detailPlanilla.personal?.nombres?.charAt(0) || '?'}
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 rounded-full border-2 border-slate-800"></div>
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-lg font-bold text-white">
                       {detailPlanilla.personal?.apellidos} {detailPlanilla.personal?.nombres}
                     </h3>
-                    <p className="text-slate-400 text-xs">{detailPlanilla.personal?.puesto || '-'} | {MESES[detailPlanilla.mes - 1]} {detailPlanilla.anio}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
+                        <BadgeDollarSign className="w-3 h-3" />
+                        {detailPlanilla.personal?.dni || 'Sin DNI'}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
+                        <Clock className="w-3 h-3" />
+                        {MESES[detailPlanilla.mes - 1]} {detailPlanilla.anio}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
+                        {detailPlanilla.personal?.puesto || 'Sin puesto'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button onClick={() => setShowDetail(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10">
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => { setShowDetail(false); handleEdit(detailPlanilla.id) }}
+                    className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all"
+                    title="Editar planilla"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setShowDetail(false)} className="p-2.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="p-4 overflow-y-auto flex-1">
+            <div className="p-4 overflow-y-auto flex-1 bg-slate-50">
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl p-3 text-white">
-                  <p className="text-emerald-100 text-[10px] uppercase font-semibold">Haberes</p>
-                  <p className="text-lg font-bold">{formatCurrency(detailPlanilla.total_haberes)}</p>
+                <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-2xl p-4 text-white shadow-lg shadow-emerald-500/25 overflow-hidden">
+                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ArrowDownToLine className="w-4 h-4 text-emerald-100" />
+                      <span className="text-emerald-100 text-[10px] font-semibold uppercase tracking-wider">Total Haberes</span>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_haberes)}</p>
+                    <p className="text-emerald-200/80 text-[10px] mt-1">{detailPlanilla.ingresos?.length || 0} conceptos</p>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-rose-400 to-red-600 rounded-xl p-3 text-white">
-                  <p className="text-rose-100 text-[10px] uppercase font-semibold">Descuentos</p>
-                  <p className="text-lg font-bold">{formatCurrency(detailPlanilla.total_descuentos)}</p>
+                <div className="relative bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 rounded-2xl p-4 text-white shadow-lg shadow-rose-500/25 overflow-hidden">
+                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ArrowUpFromLine className="w-4 h-4 text-rose-100" />
+                      <span className="text-rose-100 text-[10px] font-semibold uppercase tracking-wider">Total Descuentos</span>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_descuentos)}</p>
+                    <p className="text-rose-200/80 text-[10px] mt-1">{detailPlanilla.descuentos?.length || 0} deducciones</p>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl p-3 text-white">
-                  <p className="text-cyan-100 text-[10px] uppercase font-semibold">Líquido</p>
-                  <p className="text-lg font-bold">{formatCurrency(detailPlanilla.total_liquido)}</p>
+                <div className="relative bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/25 overflow-hidden ring-2 ring-cyan-400/30">
+                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <DollarSign className="w-4 h-4 text-cyan-100" />
+                      <span className="text-cyan-100 text-[10px] font-semibold uppercase tracking-wider">Pago Líquido</span>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_liquido)}</p>
+                    <p className="text-cyan-200/80 text-[10px] mt-1 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Listo para pagar
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
-                  <h4 className="font-bold text-emerald-600 text-xs flex items-center gap-1 mb-3 pb-2 border-b border-emerald-100">
-                    <ArrowDownToLine className="w-3 h-3" /> Ingresos
-                  </h4>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-emerald-500 rounded-lg">
+                        <ArrowDownToLine className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <h4 className="font-bold text-emerald-700 text-sm">Ingresos y Haberes</h4>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                        {detailPlanilla.ingresos?.length || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
                     {detailPlanilla.ingresos?.length === 0 ? (
-                      <p className="text-slate-400 text-xs text-center py-4">Sin ingresos</p>
+                      <div className="text-center py-8">
+                        <TrendingUp className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-slate-400 text-sm">Sin ingresos registrados</p>
+                      </div>
                     ) : (
                       detailPlanilla.ingresos?.map((i: Ingreso) => (
-                        <div key={i.id} className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                          <span className="text-slate-700 text-xs">{i.tipo}</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-bold text-emerald-700 text-xs">{formatCurrency(i.monto)}</span>
-                            <button onClick={() => deleteIngreso(i.id)} className="p-1 rounded hover:bg-red-100 text-red-400">
-                              <Trash2 className="w-3 h-3" />
+                        <div key={i.id} className="group flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-transparent rounded-xl border border-emerald-100 hover:border-emerald-200 hover:shadow-sm transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                              <TrendingUp className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <span className="text-sm font-medium text-slate-700">{i.tipo}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-emerald-700 text-sm">{formatCurrency(i.monto)}</span>
+                            <button 
+                              onClick={() => deleteIngreso(i.id)} 
+                              className="p-1 rounded hover:bg-red-100 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="flex gap-1 mt-2 pt-2 border-t border-slate-100">
-                    <input
-                      type="text"
-                      placeholder="Concepto"
-                      className="input text-xs py-1 flex-1"
-                      value={ingresoForm.tipo}
-                      onChange={e => setIngresoForm({ ...ingresoForm, tipo: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="S/"
-                      className="input text-xs py-1 w-16"
-                      value={ingresoForm.monto}
-                      onChange={e => setIngresoForm({ ...ingresoForm, monto: e.target.value })}
-                    />
-                    <button
-                      onClick={addIngreso}
-                      disabled={!ingresoForm.tipo || !ingresoForm.monto}
-                      className="px-2 bg-emerald-500 text-white rounded-lg text-xs font-semibold disabled:opacity-50"
-                    >
-                      +
-                    </button>
+                  <div className="px-3 pb-3 pt-2 border-t border-emerald-100 bg-emerald-50/50">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Concepto (ej: Sueldo Base)"
+                        className="input text-xs py-2 flex-1 shadow-sm"
+                        value={ingresoForm.tipo}
+                        onChange={e => setIngresoForm({ ...ingresoForm, tipo: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Monto"
+                        className="input text-xs py-2 w-24 shadow-sm"
+                        value={ingresoForm.monto}
+                        onChange={e => setIngresoForm({ ...ingresoForm, monto: e.target.value })}
+                      />
+                      <button
+                        onClick={addIngreso}
+                        disabled={!ingresoForm.tipo || !ingresoForm.monto}
+                        className="px-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
-                  <h4 className="font-bold text-red-600 text-xs flex items-center gap-1 mb-3 pb-2 border-b border-red-100">
-                    <ArrowUpFromLine className="w-3 h-3" /> Descuentos
-                  </h4>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-red-500 rounded-lg">
+                        <ArrowUpFromLine className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <h4 className="font-bold text-red-700 text-sm">Descuentos y Deducciones</h4>
+                      <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+                        {detailPlanilla.descuentos?.length || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
                     {detailPlanilla.descuentos?.length === 0 ? (
-                      <p className="text-slate-400 text-xs text-center py-4">Sin descuentos</p>
+                      <div className="text-center py-8">
+                        <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-slate-400 text-sm">Sin descuentos registrados</p>
+                      </div>
                     ) : (
                       detailPlanilla.descuentos?.map((d: Descuento) => (
-                        <div key={d.id} className="flex items-center justify-between p-2 bg-red-50 rounded-lg border border-red-100">
-                          <span className="text-slate-700 text-xs">{d.tipo}</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-bold text-red-700 text-xs">{formatCurrency(d.monto)}</span>
-                            <button onClick={() => deleteDescuento(d.id)} className="p-1 rounded hover:bg-red-200 text-red-400">
-                              <Trash2 className="w-3 h-3" />
+                        <div key={d.id} className="group flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-transparent rounded-xl border border-red-100 hover:border-red-200 hover:shadow-sm transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                              <Receipt className="w-4 h-4 text-red-600" />
+                            </div>
+                            <span className="text-sm font-medium text-slate-700">{d.tipo}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-red-700 text-sm">{formatCurrency(d.monto)}</span>
+                            <button 
+                              onClick={() => deleteDescuento(d.id)} 
+                              className="p-1 rounded hover:bg-red-100 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="flex gap-1 mt-2 pt-2 border-t border-slate-100">
-                    <input
-                      type="text"
-                      placeholder="Concepto"
-                      className="input text-xs py-1 flex-1"
-                      value={descuentoForm.tipo}
-                      onChange={e => setDescuentoForm({ ...descuentoForm, tipo: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="S/"
-                      className="input text-xs py-1 w-16"
-                      value={descuentoForm.monto}
-                      onChange={e => setDescuentoForm({ ...descuentoForm, monto: e.target.value })}
-                    />
-                    <button
-                      onClick={addDescuento}
-                      disabled={!descuentoForm.tipo || !descuentoForm.monto}
-                      className="px-2 bg-red-500 text-white rounded-lg text-xs font-semibold disabled:opacity-50"
-                    >
-                      +
-                    </button>
+                  <div className="px-3 pb-3 pt-2 border-t border-red-100 bg-red-50/50">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Concepto (ej: AFP)"
+                        className="input text-xs py-2 flex-1 shadow-sm"
+                        value={descuentoForm.tipo}
+                        onChange={e => setDescuentoForm({ ...descuentoForm, tipo: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Monto"
+                        className="input text-xs py-2 w-24 shadow-sm"
+                        value={descuentoForm.monto}
+                        onChange={e => setDescuentoForm({ ...descuentoForm, monto: e.target.value })}
+                      />
+                      <button
+                        onClick={addDescuento}
+                        disabled={!descuentoForm.tipo || !descuentoForm.monto}
+                        className="px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {detailPlanilla.ingresos?.length === 0 && detailPlanilla.descuentos?.length === 0 && (
+                <div className="mt-4 p-6 bg-amber-50 border border-amber-200 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-amber-800 text-sm">Planilla sin movimientos</p>
+                      <p className="text-amber-600 text-xs">Agrega ingresos y descuentos para calcular el líquido</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -845,147 +978,245 @@ export default function Planillas() {
 
       {showEdit && editPlanilla && (
         <div className="modal-overlay" onClick={() => setShowEdit(false)}>
-          <div className="modal-content w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600">
+          <div className="modal-content w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                     <Pencil className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-white">Editar Planilla</h3>
-                    <p className="text-white/70 text-xs">{editPlanilla.personal?.apellidos} {editPlanilla.personal?.nombres}</p>
+                    <p className="text-white/70 text-xs">{editPlanilla.personal?.apellidos} {editPlanilla.personal?.nombres} • {MESES[editPlanilla.mes - 1]} {editPlanilla.anio}</p>
                   </div>
                 </div>
-                <button onClick={() => setShowEdit(false)} className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10">
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 px-3 py-1.5 rounded-lg text-white text-xs font-semibold">
+                    Líquido: {formatCurrency((editPlanilla.ingresos?.reduce((s: number, i: any) => s + (i.monto || 0), 0) || 0) - (editPlanilla.descuentos?.reduce((s: number, d: any) => s + (d.monto || 0), 0) || 0))}
+                  </div>
+                  <button onClick={() => setShowEdit(false)} className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="p-4 overflow-y-auto flex-1 space-y-4">
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="label text-xs">Mes</label>
-                  <select 
-                    className="input text-sm"
-                    value={editPlanilla.mes}
-                    onChange={e => setEditPlanilla({...editPlanilla, mes: Number(e.target.value)})}
-                  >
-                    {MESES.map((m, i) => <option key={i} value={i+1}>{m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label text-xs">Año</label>
-                  <select 
-                    className="input text-sm"
-                    value={editPlanilla.anio}
-                    onChange={e => setEditPlanilla({...editPlanilla, anio: Number(e.target.value)})}
-                  >
-                    {ANIOS.map(a => <option key={a} value={a}>{a}</option>)}
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <span className="text-lg font-bold text-emerald-600">
-                    Líquido: {formatCurrency((editPlanilla.ingresos?.reduce((s: number, i: any) => s + (i.monto || 0), 0) || 0) - (editPlanilla.descuentos?.reduce((s: number, d: any) => s + (d.monto || 0), 0) || 0))}
-                  </span>
+            <div className="p-5 overflow-y-auto flex-1 bg-slate-50 space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-amber-500" /> Período de la Planilla
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Mes</label>
+                    <select 
+                      className="input text-sm py-2.5"
+                      value={editPlanilla.mes}
+                      onChange={e => setEditPlanilla({...editPlanilla, mes: Number(e.target.value)})}
+                    >
+                      {MESES.map((m, i) => <option key={i} value={i+1}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Año</label>
+                    <select 
+                      className="input text-sm py-2.5"
+                      value={editPlanilla.anio}
+                      onChange={e => setEditPlanilla({...editPlanilla, anio: Number(e.target.value)})}
+                    >
+                      {ANIOS.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl border border-slate-200 p-3">
-                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-emerald-100">
-                    <h4 className="font-bold text-emerald-600 text-xs">Ingresos</h4>
-                    <button onClick={addIngresoEdit} className="text-xs text-emerald-600 hover:underline">+ Agregar</button>
-                  </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {editPlanilla.ingresos?.map((ing: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          className="input text-xs py-1 flex-1"
-                          value={ing.tipo}
-                          onChange={e => {
-                            const newIng = [...editPlanilla.ingresos]
-                            newIng[idx].tipo = e.target.value
-                            setEditPlanilla({...editPlanilla, ingresos: newIng})
-                          }}
-                          placeholder="Concepto"
-                        />
-                        <input
-                          type="number"
-                          className="input text-xs py-1 w-20"
-                          value={ing.monto}
-                          onChange={e => {
-                            const newIng = [...editPlanilla.ingresos]
-                            newIng[idx].monto = parseFloat(e.target.value) || 0
-                            setEditPlanilla({...editPlanilla, ingresos: newIng})
-                          }}
-                          placeholder="Monto"
-                        />
-                        {ing.id > 0 ? (
-                          <button onClick={() => deleteIngresoEdit(ing.id)} className="p-1 text-red-400 hover:text-red-600">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        ) : (
-                          <button onClick={() => setEditPlanilla({...editPlanilla, ingresos: editPlanilla.ingresos.filter((_: any, i: number) => i !== idx)})} className="p-1 text-red-400 hover:text-red-600">
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-emerald-500 rounded-lg">
+                        <ArrowDownToLine className="w-3.5 h-3.5 text-white" />
                       </div>
-                    ))}
+                      <h4 className="font-bold text-emerald-700 text-sm">Ingresos</h4>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                        {editPlanilla.ingresos?.length || 0}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={addIngresoEdit} 
+                      className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      <Plus className="w-3 h-3" /> Agregar
+                    </button>
+                  </div>
+                  <div className="p-3 space-y-2 max-h-52 overflow-y-auto">
+                    {editPlanilla.ingresos?.length === 0 ? (
+                      <div className="text-center py-6">
+                        <TrendingUp className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                        <p className="text-slate-400 text-xs">Sin ingresos</p>
+                      </div>
+                    ) : (
+                      editPlanilla.ingresos?.map((ing: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 p-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                          <input
+                            type="text"
+                            className="input text-xs py-1.5 flex-1 shadow-sm"
+                            value={ing.tipo}
+                            onChange={e => {
+                              const newIng = [...editPlanilla.ingresos]
+                              newIng[idx].tipo = e.target.value
+                              setEditPlanilla({...editPlanilla, ingresos: newIng})
+                            }}
+                            placeholder="Concepto"
+                          />
+                          <input
+                            type="number"
+                            className="input text-xs py-1.5 w-24 shadow-sm"
+                            value={ing.monto}
+                            onChange={e => {
+                              const newIng = [...editPlanilla.ingresos]
+                              newIng[idx].monto = parseFloat(e.target.value) || 0
+                              setEditPlanilla({...editPlanilla, ingresos: newIng})
+                            }}
+                            placeholder="Monto"
+                          />
+                          <button 
+                            onClick={() => {
+                              if (ing.id > 0) {
+                                deleteIngresoEdit(ing.id)
+                              } else {
+                                setEditPlanilla({...editPlanilla, ingresos: editPlanilla.ingresos.filter((_: any, i: number) => i !== idx)})
+                              }
+                            }} 
+                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                            title="Eliminar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="px-3 py-2 border-t border-emerald-100 bg-emerald-50/50">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-emerald-700">Total Haberes:</span>
+                      <span className="font-bold text-emerald-800">
+                        {formatCurrency(editPlanilla.ingresos?.reduce((s: number, i: any) => s + (i.monto || 0), 0) || 0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 p-3">
-                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-red-100">
-                    <h4 className="font-bold text-red-600 text-xs">Descuentos</h4>
-                    <button onClick={addDescuentoEdit} className="text-xs text-red-600 hover:underline">+ Agregar</button>
-                  </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {editPlanilla.descuentos?.map((desc: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          className="input text-xs py-1 flex-1"
-                          value={desc.tipo}
-                          onChange={e => {
-                            const newDesc = [...editPlanilla.descuentos]
-                            newDesc[idx].tipo = e.target.value
-                            setEditPlanilla({...editPlanilla, descuentos: newDesc})
-                          }}
-                          placeholder="Concepto"
-                        />
-                        <input
-                          type="number"
-                          className="input text-xs py-1 w-20"
-                          value={desc.monto}
-                          onChange={e => {
-                            const newDesc = [...editPlanilla.descuentos]
-                            newDesc[idx].monto = parseFloat(e.target.value) || 0
-                            setEditPlanilla({...editPlanilla, descuentos: newDesc})
-                          }}
-                          placeholder="Monto"
-                        />
-                        {desc.id > 0 ? (
-                          <button onClick={() => deleteDescuentoEdit(desc.id)} className="p-1 text-red-400 hover:text-red-600">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        ) : (
-                          <button onClick={() => setEditPlanilla({...editPlanilla, descuentos: editPlanilla.descuentos.filter((_: any, i: number) => i !== idx)})} className="p-1 text-red-400 hover:text-red-600">
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-red-500 rounded-lg">
+                        <ArrowUpFromLine className="w-3.5 h-3.5 text-white" />
                       </div>
-                    ))}
+                      <h4 className="font-bold text-red-700 text-sm">Descuentos</h4>
+                      <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+                        {editPlanilla.descuentos?.length || 0}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={addDescuentoEdit} 
+                      className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 font-semibold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      <Plus className="w-3 h-3" /> Agregar
+                    </button>
+                  </div>
+                  <div className="p-3 space-y-2 max-h-52 overflow-y-auto">
+                    {editPlanilla.descuentos?.length === 0 ? (
+                      <div className="text-center py-6">
+                        <Receipt className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                        <p className="text-slate-400 text-xs">Sin descuentos</p>
+                      </div>
+                    ) : (
+                      editPlanilla.descuentos?.map((desc: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 p-2 bg-red-50 rounded-xl border border-red-100">
+                          <input
+                            type="text"
+                            className="input text-xs py-1.5 flex-1 shadow-sm"
+                            value={desc.tipo}
+                            onChange={e => {
+                              const newDesc = [...editPlanilla.descuentos]
+                              newDesc[idx].tipo = e.target.value
+                              setEditPlanilla({...editPlanilla, descuentos: newDesc})
+                            }}
+                            placeholder="Concepto"
+                          />
+                          <input
+                            type="number"
+                            className="input text-xs py-1.5 w-24 shadow-sm"
+                            value={desc.monto}
+                            onChange={e => {
+                              const newDesc = [...editPlanilla.descuentos]
+                              newDesc[idx].monto = parseFloat(e.target.value) || 0
+                              setEditPlanilla({...editPlanilla, descuentos: newDesc})
+                            }}
+                            placeholder="Monto"
+                          />
+                          <button 
+                            onClick={() => {
+                              if (desc.id > 0) {
+                                deleteDescuentoEdit(desc.id)
+                              } else {
+                                setEditPlanilla({...editPlanilla, descuentos: editPlanilla.descuentos.filter((_: any, i: number) => i !== idx)})
+                              }
+                            }} 
+                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                            title="Eliminar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="px-3 py-2 border-t border-red-100 bg-red-50/50">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-red-700">Total Descuentos:</span>
+                      <span className="font-bold text-red-800">
+                        {formatCurrency(editPlanilla.descuentos?.reduce((s: number, d: any) => s + (d.monto || 0), 0) || 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border border-cyan-100 p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-cyan-700 uppercase tracking-wider">Monto Líquido a Pagar</p>
+                      <p className="text-xs text-cyan-500">Haberes menos descuentos</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-cyan-700">
+                      {formatCurrency(
+                        (editPlanilla.ingresos?.reduce((s: number, i: any) => s + (i.monto || 0), 0) || 0) - 
+                        (editPlanilla.descuentos?.reduce((s: number, d: any) => s + (d.monto || 0), 0) || 0)
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="px-4 py-3 border-t border-slate-100 flex justify-end gap-2">
-              <button onClick={() => setShowEdit(false)} className="btn-secondary">Cancelar</button>
-              <button onClick={saveEdit} className="btn-primary">Guardar Cambios</button>
+            <div className="px-5 py-4 border-t border-slate-200 bg-white flex justify-end gap-3">
+              <button 
+                onClick={() => { setShowEdit(false); setEditPlanilla(null) }} 
+                className="btn-secondary flex items-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" /> Cancelar
+              </button>
+              <button onClick={saveEdit} className="btn-primary flex items-center gap-2">
+                <Check className="w-4 h-4" /> Guardar Cambios
+              </button>
             </div>
           </div>
         </div>
