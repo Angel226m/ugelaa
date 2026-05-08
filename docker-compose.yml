@@ -1,0 +1,63 @@
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: planillas-postgres
+    environment:
+      POSTGRES_USER: planillas
+      POSTGRES_PASSWORD: planillas123
+      POSTGRES_DB: planillas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planillas"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: planillas-backend
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=planillas
+      - DB_PASSWORD=planillas123
+      - DB_NAME=planillas_db
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: planillas-frontend
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  python-excel:
+    build:
+      context: ./python-excel
+      dockerfile: Dockerfile
+    container_name: planillas-python
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
