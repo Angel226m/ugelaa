@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -38,7 +39,25 @@ func initDB() {
 		&models.Descuento{},
 	)
 
+	crearUsuarioAdmin()
+
 	log.Println("Base de datos conectada correctamente")
+}
+
+func crearUsuarioAdmin() {
+	var count int64
+	db.Model(&models.Usuario{}).Count(&count)
+	if count == 0 {
+		hash, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+		admin := models.Usuario{
+			Nombre:       "Administrador",
+			Email:        "admin@planillas.su",
+			PasswordHash: string(hash),
+			CreatedAt:   time.Now(),
+		}
+		db.Create(&admin)
+		log.Println("Usuario admin creado: admin@planillas.su / admin123")
+	}
 }
 
 func main() {
@@ -82,6 +101,8 @@ func main() {
 			personal.POST("", handlers.CrearPersonal)
 			personal.PUT("/:id", handlers.ActualizarPersonal)
 			personal.DELETE("/:id", handlers.EliminarPersonal)
+			personal.GET("/:id/periodos", handlers.ObtenerPeriodosPersonal)
+			personal.GET("/:id/exportar", handlers.ExportarPlanillasPersonal)
 		}
 
 		planillas := api.Group("/planillas")

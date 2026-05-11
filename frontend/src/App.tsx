@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard'
 import Personal from './pages/Personal'
 import Planillas from './pages/Planillas'
 import Importar from './pages/Importar'
+import Exportar from './pages/Exportar'
+import Configuracion from './pages/Configuracion'
 import Auth from './pages/Auth'
 
 const AuthContext = createContext<{ isAuthenticated: boolean; login: () => void; logout: () => void }>({ 
@@ -38,6 +40,8 @@ function AppContent() {
   const logout = () => {
     setIsAuthenticated(false)
     localStorage.setItem('isAuthenticated', 'false')
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_data')
   }
 
   return (
@@ -49,6 +53,8 @@ function AppContent() {
           <Route path="personal" element={<Personal />} />
           <Route path="planillas" element={<Planillas />} />
           <Route path="importar" element={<Importar />} />
+          <Route path="exportar" element={<Exportar />} />
+          <Route path="configuracion" element={<Configuracion />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -57,6 +63,7 @@ function AppContent() {
 }
 
 function App() {
+  document.body.classList.add('dark')
   return (
     <BrowserRouter>
       <AppContent />

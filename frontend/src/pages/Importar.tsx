@@ -1,5 +1,5 @@
 ﻿import { useState, useRef } from 'react'
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, Calendar, Users, LayoutList, FileType, ArrowRight, HelpCircle } from 'lucide-react'
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Calendar, Users, LayoutList, FileType, ArrowRight, HelpCircle } from 'lucide-react'
 
 const MESES = [
   { v: 1, l: 'Enero' }, { v: 2, l: 'Febrero' }, { v: 3, l: 'Marzo' },
@@ -86,10 +86,10 @@ export default function Importar() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Upload className="w-5 h-5 text-cyan-500" />
-            <span className="text-sm font-medium text-cyan-600">Importación de Datos</span>
+            <span className="text-sm font-medium text-cyan-600 dark:text-cyan-400">Importación de Datos</span>
           </div>
-          <h2 className="page-title">Importar Planilla</h2>
-          <p className="text-slate-500 mt-1">Carga archivos Excel para importar nóminas masivamente</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Importar Planilla</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Carga archivos Excel para importar nóminas masivamente</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-5">
@@ -143,10 +143,10 @@ export default function Importar() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Upload className="w-5 h-5 text-cyan-500" />
-          <span className="text-sm font-medium text-cyan-600">Importación de Datos</span>
+          <span className="text-sm font-medium text-cyan-600 dark:text-cyan-400">Importación de Datos</span>
         </div>
-        <h2 className="page-title">Importar Planilla</h2>
-        <p className="text-slate-500 mt-1">Carga archivos Excel para importar nóminas masivamente</p>
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Importar Planilla</h2>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Carga archivos Excel para importar nóminas masivamente</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -157,13 +157,13 @@ export default function Importar() {
                 <Calendar className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">1. Seleccionar Período</h3>
-                <p className="text-xs text-slate-500">Mes y año de la planilla</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">1. Seleccionar Período</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Mes y año de la planilla</p>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-600 mb-2">Mes</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Mes</label>
                 <select
                   value={mes}
                   onChange={e => setMes(Number(e.target.value))}
@@ -175,7 +175,7 @@ export default function Importar() {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-600 mb-2">Año</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Año</label>
                 <select
                   value={anio}
                   onChange={e => setAnio(Number(e.target.value))}
@@ -195,13 +195,13 @@ export default function Importar() {
                 <Upload className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">2. Subir Archivo</h3>
-                <p className="text-xs text-slate-500">Arrastra el archivo o haz clic para seleccionar</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">2. Subir Archivo</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Arrastra el archivo o haz clic para seleccionar</p>
               </div>
             </div>
 
             <div
-              className={`upload-zone relative overflow-hidden hover-lift transition-smooth ${dragging ? 'upload-zone-active' : file ? 'border-emerald-300 bg-emerald-50/50' : ''}`}
+              className={`upload-zone relative overflow-hidden hover-lift transition-smooth ${dragging ? 'upload-zone-active' : file ? 'border-emerald-300 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/20' : ''}`}
               onClick={() => fileInputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
@@ -220,17 +220,17 @@ export default function Importar() {
                     <FileSpreadsheet className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-left">
-                    <p className="font-semibold text-slate-800">{file.name}</p>
-                    <p className="text-sm text-slate-500">{(file.size / 1024).toFixed(1)} KB • {mesNombre} {anio}</p>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{file.name}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{(file.size / 1024).toFixed(1)} KB - {mesNombre} {anio}</p>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8 text-cyan-500" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Upload className="w-8 h-8 text-cyan-500 dark:text-cyan-400" />
                   </div>
-                  <p className="text-slate-700 font-medium mb-1">Arrastra el archivo aquí</p>
-                  <p className="text-sm text-slate-400">o haz clic para seleccionar • .xlsx, .xls</p>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium mb-1">Arrastra el archivo aquí</p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500">o haz clic para seleccionar - .xlsx, .xls</p>
                 </div>
               )}
             </div>
@@ -241,34 +241,17 @@ export default function Importar() {
                 <span className="text-sm">{error}</span>
               </div>
             )}
-
-            <div className="mt-5 flex gap-3">
-              <button
-                onClick={handleUpload}
-                disabled={!file || uploading}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50"
-              >
-                {uploading ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" />Importando...</>
-                ) : (
-                  <><Upload className="w-4 h-4" />Importar - {mesNombre} {anio}</>
-                )}
-              </button>
-              {(file || result) && !uploading && (
-                <button onClick={resetForm} className="btn-secondary">Limpiar</button>
-              )}
-            </div>
           </div>
 
           {result && (
-            <div className="section-card bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+            <div className="section-card bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800">
               <div className="flex items-center gap-4 mb-5">
                 <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
                   <CheckCircle className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-emerald-900">¡Importación Exitosa!</h3>
-                  <p className="text-sm text-emerald-700">Período: {mesNombre} {anio}</p>
+                  <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-300">Importación Exitosa!</h3>
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400">Período: {mesNombre} {anio}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -278,23 +261,31 @@ export default function Importar() {
                   { label: 'Planillas', value: result.planillas_creadas ?? 0, icon: FileSpreadsheet },
                   { label: 'Total', value: result.planillas ?? result.planillas_count ?? 0, icon: LayoutList },
                 ].map(({ label, value, icon: Icon }, idx) => (
-                  <div key={idx} className="bg-white rounded-xl p-4 border border-emerald-100 text-center">
-                    <Icon className="w-5 h-5 text-emerald-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-emerald-700">{value}</p>
-                    <p className="text-xs text-slate-500">{label}</p>
+                  <div key={idx} className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800 text-center">
+                    <Icon className="w-5 h-5 text-emerald-500 dark:text-emerald-400 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{value}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
                   </div>
                 ))}
               </div>
               {result.errores && result.errores.length > 0 && (
-                <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                  <p className="text-sm font-semibold text-amber-700 mb-2">Advertencias ({result.errores.length})</p>
-                  <ul className="text-sm text-amber-600 space-y-1">
-                    {result.errores.slice(0, 5).map((e: string, i: number) => <li key={i}>• {e}</li>)}
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                  <p className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2">Advertencias ({result.errores.length})</p>
+                  <ul className="text-sm text-amber-600 dark:text-amber-500 space-y-1">
+                    {result.errores.slice(0, 5).map((e: string, i: number) => <li key={i}>- {e}</li>)}
                   </ul>
                 </div>
               )}
             </div>
           )}
+          {file && (
+            <div className="flex gap-3 mt-4">
+              <button onClick={resetForm} className="btn-secondary">Limpiar</button>
+            </div>
+          )}
+          <button onClick={handleUpload} disabled={!file || uploading} className="btn-primary flex items-center gap-2 mt-4 disabled:opacity-50">
+            <Upload className="w-4 h-4" /> Importar - {mesNombre} {anio}
+          </button>
         </div>
 
         <div className="space-y-5">
@@ -303,9 +294,9 @@ export default function Importar() {
               <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
                 <LayoutList className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Formato Excel</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Formato Excel</h3>
             </div>
-            <div className="bg-slate-900 rounded-xl p-4 text-xs font-mono text-slate-300 space-y-1">
+            <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-4 text-xs font-mono text-slate-300 space-y-1">
               <div className="flex gap-2 text-slate-500 border-b border-slate-700 pb-2 mb-2">
                 <span className="w-8">Col A</span>
                 <span className="w-16">Col B</span>
@@ -331,7 +322,7 @@ export default function Importar() {
               <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
                 <HelpCircle className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Estructura de Datos</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Estructura de Datos</h3>
             </div>
             <div className="space-y-3">
               {[

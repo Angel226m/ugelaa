@@ -41,9 +41,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	token := fmt.Sprintf("token_%d_%d", usuario.ID, time.Now().Unix())
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login exitoso",
-		"user":    usuario,
+		"token":   token,
+		"user": gin.H{
+			"id":     usuario.ID,
+			"nombre": usuario.Nombre,
+			"email":  usuario.Email,
+		},
 	})
 }
 
@@ -80,15 +87,29 @@ func ListarPersonal(c *gin.Context) {
 	search := c.Query("search")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	sortBy := c.DefaultQuery("sort_by", "apellidos")
+	sortOrder := c.DefaultQuery("sort_order", "asc")
+	
 	if limit > 100 { limit = 100 }
 	offset := (page - 1) * limit
 
+	// Validar campos de ordenamiento
+	validSortFields := map[string]bool{"apellidos": true, "nombres": true, "dni": true, "created_at": true, "activo": true}
+	if !validSortFields[sortBy] {
+		sortBy = "apellidos"
+	}
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "asc"
+	}
+
 	baseQuery := db.Model(&models.Personal{})
 
+	// Filtro por búsqueda
 	if search != "" {
 		baseQuery = baseQuery.Where("nombres ILIKE ? OR apellidos ILIKE ? OR dni ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
 	}
 
+	// Filtro por estado activo
 	activo := c.Query("activo")
 	if activo == "true" {
 		baseQuery = baseQuery.Where("activo = ?", true)
@@ -96,8 +117,39 @@ func ListarPersonal(c *gin.Context) {
 		baseQuery = baseQuery.Where("activo = ?", false)
 	}
 
+	// Filtro por puesto
+	puesto := c.Query("puesto")
+	if puesto != "" {
+		baseQuery = baseQuery.Where("puesto ILIKE ?", "%"+puesto+"%")
+	}
+
+	// Filtro por RD
+	rd := c.Query("rd")
+	if rd != "" {
+		baseQuery = baseQuery.Where("rd ILIKE ?", "%"+rd+"%")
+	}
+
+	// Filtro por UU
+	uu := c.Query("uu")
+	if uu != "" {
+		baseQuery = baseQuery.Where("uu ILIKE ?", "%"+uu+"%")
+	}
+
 	baseQuery.Count(&total)
-	baseQuery.Offset(offset).Limit(limit).Order("apellidos, nombres").Find(&personal)
+	
+	// Ordenar dinámicamente
+	orderStr := sortBy
+	if sortOrder == "desc" {
+		orderStr += " DESC"
+	} else {
+		orderStr += " ASC"
+	}
+	// Agregar segundo ordenamiento por nombres si es apellido
+	if sortBy == "apellidos" {
+		orderStr += ", nombres ASC"
+	}
+	
+	baseQuery.Offset(offset).Limit(limit).Order(orderStr).Find(&personal)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": personal,
@@ -205,24 +257,86 @@ func ListarPlanillas(c *gin.Context) {
 	search := c.Query("search")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	sortBy := c.DefaultQuery("sort_by", "anio")
+	sortOrder := c.DefaultQuery("sort_order", "desc")
+	
 	if limit > 100 { limit = 100 }
 	offset := (page - 1) * limit
+
+	// Validar campos de ordenamiento
+	validSortFields := map[string]bool{"anio": true, "mes": true, "total_haberes": true, "total_descuentos": true, "total_liquido": true, "created_at": true}
+	if !validSortFields[sortBy] {
+		sortBy = "anio"
+	}
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "desc"
+	}
 
 	baseQuery := db.Model(&models.Planilla{}).Preload("Personal")
 
 	if mes != "" {
-		baseQuery = baseQuery.Where("mes = ?", mes)
+		mesInt, _ := strconv.Atoi(mes)
+		if mesInt > 0 && mesInt <= 12 {
+			baseQuery = baseQuery.Where("mes = ?", mesInt)
+		}
 	}
 	if anio != "" {
-		baseQuery = baseQuery.Where("anio = ?", anio)
+		anioInt, _ := strconv.Atoi(anio)
+		if anioInt > 2000 {
+			baseQuery = baseQuery.Where("anio = ?", anioInt)
+		}
 	}
 	if search != "" {
 		baseQuery = baseQuery.Joins("JOIN personal ON personal.id = planilla.personal_id").
 			Where("personal.nombres ILIKE ? OR personal.apellidos ILIKE ? OR personal.dni ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
 	}
 
+	// Filtro por rango de haberes
+	minHaberes := c.Query("min_haberes")
+	maxHaberes := c.Query("max_haberes")
+	if minHaberes != "" {
+		minVal, _ := strconv.ParseFloat(minHaberes, 64)
+		if minVal > 0 {
+			baseQuery = baseQuery.Where("total_haberes >= ?", minVal)
+		}
+	}
+	if maxHaberes != "" {
+		maxVal, _ := strconv.ParseFloat(maxHaberes, 64)
+		if maxVal > 0 {
+			baseQuery = baseQuery.Where("total_haberes <= ?", maxVal)
+		}
+	}
+
+	// Filtro por rango de descuentos
+	minDescuentos := c.Query("min_descuentos")
+	maxDescuentos := c.Query("max_descuentos")
+	if minDescuentos != "" {
+		minVal, _ := strconv.ParseFloat(minDescuentos, 64)
+		if minVal > 0 {
+			baseQuery = baseQuery.Where("total_descuentos >= ?", minVal)
+		}
+	}
+	if maxDescuentos != "" {
+		maxVal, _ := strconv.ParseFloat(maxDescuentos, 64)
+		if maxVal > 0 {
+			baseQuery = baseQuery.Where("total_descuentos <= ?", maxVal)
+		}
+	}
+
 	baseQuery.Count(&total)
-	baseQuery.Offset(offset).Limit(limit).Order("anio DESC, mes DESC").Find(&planillas)
+	
+	// Ordenar dinámicamente
+	orderStr := sortBy
+	if sortOrder == "desc" {
+		orderStr += " DESC"
+	} else {
+		orderStr += " ASC"
+	}
+	if sortBy == "anio" {
+		orderStr += ", mes DESC"
+	}
+	
+	baseQuery.Offset(offset).Limit(limit).Order(orderStr).Find(&planillas)
 
 	for i := range planillas {
 		planillas[i].CalculateTotal()
@@ -968,5 +1082,116 @@ func ResumenDashboard(c *gin.Context) {
 		"total_descuentos": totalDescuentos,
 		"total_liquido":    totalHaberes - totalDescuentos,
 		"planillas_mes":    planillasMes,
+	})
+}
+
+// ObtenerPeriodosPersonal retorna los períodos (años y meses) disponibles de un empleado
+func ObtenerPeriodosPersonal(c *gin.Context) {
+	db := getDB(c)
+	personalID := c.Param("id")
+
+	var personal models.Personal
+	if err := db.First(&personal, personalID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Personal no encontrado"})
+		return
+	}
+
+	type Periodo struct {
+		Anio int16 `json:"anio"`
+		Mes  int16 `json:"mes"`
+	}
+
+	var periodos []Periodo
+	db.Model(&models.Planilla{}).
+		Select("DISTINCT anio, mes").
+		Where("personal_id = ?", personalID).
+		Order("anio DESC, mes DESC").
+		Scan(&periodos)
+
+	// Agrupar por año
+	añosMap := make(map[int16][]int16)
+	for _, p := range periodos {
+		añosMap[p.Anio] = append(añosMap[p.Anio], p.Mes)
+	}
+
+	var años []int16
+	for a := range añosMap {
+		años = append(años, a)
+	}
+	// Ordenar años descendente
+	for i := 0; i < len(años)-1; i++ {
+		for j := i + 1; j < len(años); j++ {
+			if años[j] > años[i] {
+				años[i], años[j] = años[j], años[i]
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"años":     años,
+		"meses":    añosMap,
+		"total":    len(periodos),
+	})
+}
+
+// ExportarPlanillasPersonal exporta las planillas de un empleado específico
+func ExportarPlanillasPersonal(c *gin.Context) {
+	db := getDB(c)
+	personalID := c.Param("id")
+	
+	mes := c.Query("mes")
+	anio := c.Query("anio")
+
+	var personal models.Personal
+	if err := db.First(&personal, personalID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Personal no encontrado"})
+		return
+	}
+
+	baseQuery := db.Model(&models.Planilla{}).Preload("Personal").Preload("Ingresos").Preload("Descuentos")
+	baseQuery = baseQuery.Where("personal_id = ?", personalID)
+
+	if mes != "" {
+		mesInt, _ := strconv.Atoi(mes)
+		if mesInt > 0 && mesInt <= 12 {
+			baseQuery = baseQuery.Where("mes = ?", mesInt)
+		}
+	}
+	if anio != "" {
+		anioInt, _ := strconv.Atoi(anio)
+		if anioInt > 2000 {
+			baseQuery = baseQuery.Where("anio = ?", anioInt)
+		}
+	}
+
+	var planillas []models.Planilla
+	baseQuery.Order("anio DESC, mes DESC").Find(&planillas)
+
+	for i := range planillas {
+		planillas[i].CalculateTotal()
+	}
+
+	var totalHaberes, totalDescuentos, totalLiquido float64
+	for _, p := range planillas {
+		totalHaberes += p.TotalHaberes
+		totalDescuentos += p.TotalDescuentos
+		totalLiquido += p.TotalLiquido
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"personal": gin.H{
+			"id":        personal.ID,
+			"dni":       personal.DNI,
+			"nombres":   personal.Nombres,
+			"apellidos": personal.Apellidos,
+			"puesto":    personal.Puesto,
+			"rd":        personal.RD,
+			"uu":        personal.UU,
+		},
+		"planillas":        planillas,
+		"total_haberes":   totalHaberes,
+		"total_descuentos": totalDescuentos,
+		"total_liquido":    totalLiquido,
+		"cantidad":         len(planillas),
 	})
 }

@@ -41,7 +41,7 @@ Sistema de nómina profesional desarrollado para gestionar de manera eficiente:
 - **Dashboard**: Resumen general de datos
 
 ---
-
+admin@planillas.su' 'admin123'
 ## Tech Stack
 
 | Componente | Tecnología | Descripción |
