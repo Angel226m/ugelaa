@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, FileSpreadsheet, Upload, Settings, Bell, Menu, X, PanelLeftClose, PanelLeft, LogOut as LogOutIcon, ChevronDown, Moon, Sun, UserCircle, ChevronRight, Shield, HelpCircle, Download } from 'lucide-react'
+import { LayoutDashboard, Users, FileSpreadsheet, Upload, Settings, Bell, Menu, X, PanelLeftClose, PanelLeft, LogOut as LogOutIcon, ChevronDown, UserCircle, ChevronRight, Shield, HelpCircle, Download } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../App'
 
@@ -19,15 +19,8 @@ export default function Layout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const savedDark = localStorage.getItem('dark_mode') === 'true'
-    setDarkMode(savedDark)
-    document.documentElement.classList.toggle('dark', savedDark)
-  }, [])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -49,13 +42,6 @@ export default function Layout() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const toggleDarkMode = () => {
-    const newMode = !darkMode
-    setDarkMode(newMode)
-    localStorage.setItem('dark_mode', String(newMode))
-    document.documentElement.classList.toggle('dark', newMode)
-  }
 
   const notifications = [
     { id: 1, title: 'Nueva planilla creada', desc: 'Se registró una nueva planilla para Mayo 2026', time: 'Hace 5 min', color: 'bg-cyan-500' },
@@ -79,11 +65,11 @@ export default function Layout() {
   const currentPage = navItems.find(n => window.location.pathname === n.to)?.label || 'Dashboard'
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+    <div className="min-h-screen bg-slate-50">
       {sidebarVisible && !isMobile && (
-        <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out ${isCollapsed ? 'w-24' : 'w-72'} ${darkMode ? 'bg-slate-900/95 border-r border-slate-800' : 'bg-white/95 backdrop-blur-xl border-r border-slate-200/80'} shadow-2xl`}>
+        <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out ${isCollapsed ? 'w-24' : 'w-72'} bg-white/95 backdrop-blur-xl border-r border-slate-200/80 shadow-2xl`}>
           <div className="flex flex-col h-full">
-            <div className={`p-6 ${darkMode ? 'border-b border-slate-800' : 'border-b border-slate-100'}`}>
+            <div className="p-6 border-b border-slate-100">
               <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 <div className={`flex items-center gap-4 ${isCollapsed ? 'justify-center' : ''}`}>
                   <div className="relative">
@@ -94,13 +80,13 @@ export default function Layout() {
                   </div>
                   {!isCollapsed && (
                     <div>
-                      <h1 className="text-xl font-bold text-slate-900 dark:text-white">Planillas SU</h1>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Gestión de Nómina</p>
+                      <h1 className="text-xl font-bold text-slate-900">Planillas SU</h1>
+                      <p className="text-xs text-slate-500">Gestión de Nómina</p>
                     </div>
                   )}
                 </div>
                 {!isCollapsed && (
-                  <button onClick={() => setIsCollapsed(true)} className={`p-2.5 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
+                  <button onClick={() => setIsCollapsed(true)} className="p-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
                     <PanelLeftClose className="w-5 h-5" />
                   </button>
                 )}
@@ -108,8 +94,8 @@ export default function Layout() {
             </div>
 
             {isCollapsed && (
-              <div className={`p-4 ${darkMode ? 'border-b border-slate-800' : 'border-b border-slate-100'}`}>
-                <button onClick={() => setIsCollapsed(false)} className={`w-full flex items-center justify-center p-3 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
+              <div className="p-4 border-b border-slate-100">
+                <button onClick={() => setIsCollapsed(false)} className="w-full flex items-center justify-center p-3 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
                   <PanelLeft className="w-5 h-5" />
                 </button>
               </div>
@@ -124,15 +110,13 @@ export default function Layout() {
                     `group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                       isActive
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25'
-                        : darkMode
-                          ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                          : 'text-slate-600 hover:bg-slate-100'
+                        : 'text-slate-600 hover:bg-slate-100'
                     } ${isCollapsed ? 'justify-center px-2' : ''}`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <div className={`p-2.5 rounded-xl flex-shrink-0 ${isActive ? 'bg-white/20' : darkMode ? 'bg-slate-800' : 'bg-slate-100'} group-hover:scale-105 transition-transform`}>
+                      <div className={`p-2.5 rounded-xl flex-shrink-0 ${isActive ? 'bg-white/20' : 'bg-slate-100'} group-hover:scale-105 transition-transform`}>
                         <item.icon className="w-5 h-5" />
                       </div>
                       {!isCollapsed && (
@@ -155,13 +139,11 @@ export default function Layout() {
                   `group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 mt-3 ${
                     isActive
                       ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-500/25'
-                      : darkMode
-                        ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                        : 'text-slate-600 hover:bg-slate-100'
+                      : 'text-slate-600 hover:bg-slate-100'
                   } ${isCollapsed ? 'justify-center px-2' : ''}`
                 }
               >
-                <div className={`p-2.5 rounded-xl flex-shrink-0 ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                <div className="p-2.5 rounded-xl flex-shrink-0 bg-slate-100">
                   <Settings className="w-5 h-5" />
                 </div>
                 {!isCollapsed && (
@@ -173,26 +155,22 @@ export default function Layout() {
               </NavLink>
             </nav>
 
-            <div className={`p-4 ${darkMode ? 'border-t border-slate-800' : 'border-t border-slate-100'}`}>
-              <div className={`rounded-2xl p-4 ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100'}`}>
+            <div className="p-4 border-t border-slate-100">
+              <div className="rounded-2xl p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-11 h-11 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md">
                     {userInitials}
                   </div>
                   {!isCollapsed && (
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
+                      <p className="text-sm font-semibold text-slate-900 truncate">{userName}</p>
+                      <p className="text-xs text-slate-500 truncate">{userEmail}</p>
                     </div>
                   )}
                 </div>
                 <button
                   onClick={handleLogout}
-                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all text-sm font-medium ${
-                    darkMode 
-                      ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
-                      : 'bg-red-50 hover:bg-red-100 text-red-600'
-                  }`}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all text-sm font-medium bg-red-50 hover:bg-red-100 text-red-600"
                 >
                   <LogOutIcon className="w-4 h-4" />
                   {!isCollapsed && <span>Cerrar Sesión</span>}
@@ -205,19 +183,19 @@ export default function Layout() {
 
       {sidebarVisible && isMobile && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setSidebarVisible(false)}>
-          <aside className={`fixed inset-y-0 left-0 w-80 ${darkMode ? 'bg-slate-900' : 'bg-white'} shadow-2xl animate-slide-in`} onClick={e => e.stopPropagation()}>
+          <aside className="fixed inset-y-0 left-0 w-80 bg-white shadow-2xl animate-slide-in" onClick={e => e.stopPropagation()}>
             <div className="flex flex-col h-full">
-              <div className={`p-6 ${darkMode ? 'border-b border-slate-800' : 'border-b border-slate-100'} flex items-center justify-between`}>
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
                     <FileSpreadsheet className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">Planillas SU</h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Gestión de Nómina</p>
+                    <h1 className="text-xl font-bold text-slate-900">Planillas SU</h1>
+                    <p className="text-xs text-slate-500">Gestión de Nómina</p>
                   </div>
                 </div>
-                <button onClick={() => setSidebarVisible(false)} className={`p-2.5 rounded-xl ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
+                <button onClick={() => setSidebarVisible(false)} className="p-2.5 rounded-xl hover:bg-slate-100 text-slate-500">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -232,13 +210,11 @@ export default function Layout() {
                       `group flex items-center gap-3 px-4 py-4 rounded-2xl transition-all duration-200 ${
                         isActive
                           ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
-                          : darkMode
-                            ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            : 'text-slate-600 hover:bg-slate-100'
+                          : 'text-slate-600 hover:bg-slate-100'
                       }`
                     }
                   >
-                    <div className={`p-2.5 rounded-xl flex-shrink-0 ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                    <div className="p-2.5 rounded-xl flex-shrink-0 bg-slate-100">
                       <item.icon className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
@@ -254,13 +230,11 @@ export default function Layout() {
                     `group flex items-center gap-3 px-4 py-4 rounded-2xl transition-all duration-200 ${
                       isActive
                         ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
-                        : darkMode
-                          ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                          : 'text-slate-600 hover:bg-slate-100'
+                        : 'text-slate-600 hover:bg-slate-100'
                     }`
                   }
                 >
-                  <div className={`p-2.5 rounded-xl flex-shrink-0 ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                  <div className="p-2.5 rounded-xl flex-shrink-0 bg-slate-100">
                     <Settings className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
@@ -270,8 +244,8 @@ export default function Layout() {
                 </NavLink>
               </nav>
 
-              <div className={`p-4 ${darkMode ? 'border-t border-slate-800' : 'border-t border-slate-100'}`}>
-                <button onClick={handleLogout} className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all ${darkMode ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}>
+              <div className="p-4 border-t border-slate-100">
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all text-red-600 hover:bg-red-50">
                   <LogOutIcon className="w-5 h-5" />
                   <div className="text-left flex-1">
                     <p className="font-semibold text-sm">Cerrar Sesión</p>
@@ -285,16 +259,16 @@ export default function Layout() {
       )}
 
       <div className={`transition-all duration-300 ${!isMobile && !sidebarVisible ? 'lg:ml-0' : !isMobile ? (isCollapsed ? 'lg:ml-24' : 'lg:ml-72') : ''}`}>
-        <header className={`sticky top-0 z-30 backdrop-blur-2xl border-b transition-all duration-500 ${darkMode ? 'bg-slate-900/80 border-slate-800/50' : 'bg-white/80 border-slate-200/50'} shadow-lg shadow-slate-900/5`}>
+        <header className="sticky top-0 z-30 backdrop-blur-2xl border-b transition-all duration-500 bg-white/80 border-slate-200/50 shadow-lg shadow-slate-900/5">
           <div className="flex items-center justify-between px-6 lg:px-8 h-18">
             <div className="flex items-center gap-4">
               {!sidebarVisible && !isMobile && (
-                <button onClick={() => setSidebarVisible(true)} className={`p-2.5 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-600'}`} title="Abrir menú">
+                <button onClick={() => setSidebarVisible(true)} className="p-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-600" title="Abrir menú">
                   <Menu className="w-5 h-5" />
                 </button>
               )}
               {isMobile && (
-                <button onClick={() => setSidebarVisible(true)} className={`p-2.5 rounded-xl lg:hidden transition-all ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-600'}`}>
+                <button onClick={() => setSidebarVisible(true)} className="p-2.5 rounded-xl lg:hidden transition-all hover:bg-slate-100 text-slate-600">
                   <Menu className="w-5 h-5" />
                 </button>
               )}
@@ -304,8 +278,8 @@ export default function Layout() {
                     <FileSpreadsheet className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{currentPage}</h2>
-                    <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
+                    <h2 className="text-lg font-bold text-slate-900">{currentPage}</h2>
+                    <p className="text-xs text-slate-500">
                       {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
@@ -314,37 +288,33 @@ export default function Layout() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button onClick={toggleDarkMode} className={`p-2.5 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-800 text-amber-400' : 'hover:bg-slate-100 text-slate-500'}`} title={darkMode ? 'Modo claro' : 'Modo oscuro'}>
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
               <div className="relative" ref={notifRef}>
-                <button onClick={() => setNotifOpen(!notifOpen)} className={`relative p-2.5 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}>
+                <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
                 
                 {notifOpen && (
-                  <div className={`absolute right-0 top-full mt-3 w-96 rounded-2xl shadow-2xl border overflow-hidden z-50 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
-                    <div className={`px-5 py-4 ${darkMode ? 'border-b border-slate-700' : 'border-b border-slate-100'}`}>
-                      <h3 className={`font-bold text-base ${darkMode ? 'text-white' : 'text-slate-900'}`}>Notificaciones</h3>
+                  <div className="absolute right-0 top-full mt-3 w-96 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white border-slate-100">
+                    <div className="px-5 py-4 border-b border-slate-100">
+                      <h3 className="font-bold text-base text-slate-900">Notificaciones</h3>
                       <p className="text-sm text-slate-500">{notifications.length} notificaciones sin leer</p>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.map(n => (
-                        <div key={n.id} className={`flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer ${darkMode ? 'border-b border-slate-700' : 'border-b border-slate-100'} last:border-0 transition-colors`}>
+                        <div key={n.id} className="flex items-start gap-4 p-5 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors">
                           <div className={`w-12 h-12 ${n.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
                             <Bell className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{n.title}</p>
+                            <p className="text-sm font-semibold text-slate-900">{n.title}</p>
                             <p className="text-sm text-slate-500 mt-1">{n.desc}</p>
                             <p className="text-xs text-cyan-500 mt-2 font-medium">{n.time}</p>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className={`px-5 py-4 ${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} text-center`}>
+                    <div className="px-5 py-4 bg-slate-50 text-center">
                       <button className="text-sm text-cyan-600 font-semibold hover:underline">Ver todas las notificaciones</button>
                     </div>
                   </div>
@@ -352,21 +322,21 @@ export default function Layout() {
               </div>
 
               <div className="relative" ref={userMenuRef}>
-                <button onClick={() => setUserMenuOpen(!userMenuOpen)} className={`flex items-center gap-3 pl-2 rounded-2xl py-2 pr-3 transition-all ${darkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-50'}`}>
+                <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="flex items-center gap-3 pl-2 rounded-2xl py-2 pr-3 transition-all hover:bg-slate-50">
                   <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md">
                     {userInitials}
                   </div>
                   <div className="text-left hidden md:block">
-                    <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{userName}</p>
+                    <p className="text-sm font-semibold text-slate-900">{userName}</p>
                     <p className="text-xs text-slate-500">Administrador</p>
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {userMenuOpen && (
-                  <div className={`absolute right-0 top-full mt-3 w-64 rounded-2xl shadow-2xl border overflow-hidden z-50 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
-                    <div className={`px-5 py-4 ${darkMode ? 'border-b border-slate-700' : 'border-b border-slate-100'}`}>
-                      <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{userName}</p>
+                  <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white border-slate-100">
+                    <div className="px-5 py-4 border-b border-slate-100">
+                      <p className="text-sm font-semibold text-slate-900">{userName}</p>
                       <p className="text-sm text-slate-500">{userEmail}</p>
                     </div>
                     <div className="py-2">
@@ -376,13 +346,13 @@ export default function Layout() {
                         { icon: Shield, label: 'Seguridad' },
                         { icon: HelpCircle, label: 'Ayuda' },
                       ].map((item, i) => (
-                        <button key={i} className={`w-full flex items-center gap-3 px-5 py-3 transition-all ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'}`}>
+                        <button key={i} className="w-full flex items-center gap-3 px-5 py-3 transition-all text-slate-600 hover:bg-slate-50">
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
                         </button>
                       ))}
                     </div>
-                    <div className={`border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                    <div className="border-t border-slate-100">
                       <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition-all">
                         <LogOutIcon className="w-4 h-4" />
                         <span className="text-sm font-semibold">Cerrar Sesión</span>
