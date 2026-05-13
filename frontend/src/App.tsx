@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useState, createContext, useContext } from 'react'
+import { useState, createContext, useContext, useEffect } from 'react'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Personal from './pages/Personal'
@@ -17,6 +17,13 @@ const AuthContext = createContext<{ isAuthenticated: boolean; login: () => void;
 
 export const useAuth = () => useContext(AuthContext)
 
+const ThemeContext = createContext<{ isDark: boolean; toggleTheme: () => void }>({
+  isDark: false,
+  toggleTheme: () => {}
+})
+
+export const useTheme = () => useContext(ThemeContext)
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
@@ -32,6 +39,22 @@ function AppContent() {
     return localStorage.getItem('isAuthenticated') === 'true'
   })
 
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') === 'dark'
+  })
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDark])
+
+  const toggleTheme = () => setIsDark(!isDark)
+
   const login = () => {
     setIsAuthenticated(true)
     localStorage.setItem('isAuthenticated', 'true')
@@ -45,25 +68,26 @@ function AppContent() {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
-      <Routes>
-        <Route path="/auth" element={isAuthenticated ? <Navigate to="/" replace /> : <Auth />} />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="personal" element={<Personal />} />
-          <Route path="planillas" element={<Planillas />} />
-          <Route path="importar" element={<Importar />} />
-          <Route path="exportar" element={<Exportar />} />
-          <Route path="configuracion" element={<Configuracion />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthContext.Provider>
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <Routes>
+          <Route path="/auth" element={isAuthenticated ? <Navigate to="/" replace /> : <Auth />} />
+          <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="personal" element={<Personal />} />
+            <Route path="planillas" element={<Planillas />} />
+            <Route path="importar" element={<Importar />} />
+            <Route path="exportar" element={<Exportar />} />
+            <Route path="configuracion" element={<Configuracion />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthContext.Provider>
+    </ThemeContext.Provider>
   )
 }
 
 function App() {
-  document.body.classList.add('dark')
   return (
     <BrowserRouter>
       <AppContent />

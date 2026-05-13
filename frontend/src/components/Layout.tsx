@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, FileSpreadsheet, Upload, Settings, Bell, Menu, X, PanelLeftClose, PanelLeft, LogOut as LogOutIcon, ChevronDown, UserCircle, ChevronRight, Shield, HelpCircle, Download } from 'lucide-react'
+import { LayoutDashboard, Users, FileSpreadsheet, Upload, Settings, Bell, Menu, X, PanelLeftClose, PanelLeft, LogOut as LogOutIcon, ChevronDown, UserCircle, ChevronRight, Shield, HelpCircle, Download, Sun, Moon } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../App'
+import { useAuth, useTheme } from '../App'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard', desc: 'Resumen general' },
@@ -13,6 +13,7 @@ const navItems = [
 
 export default function Layout() {
   const { logout } = useAuth()
+  const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [sidebarVisible, setSidebarVisible] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -65,11 +66,11 @@ export default function Layout() {
   const currentPage = navItems.find(n => window.location.pathname === n.to)?.label || 'Dashboard'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {sidebarVisible && !isMobile && (
-        <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out ${isCollapsed ? 'w-24' : 'w-72'} bg-white/95 backdrop-blur-xl border-r border-slate-200/80 shadow-2xl`}>
+        <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out ${isCollapsed ? 'w-24' : 'w-72'} bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-700/80 shadow-2xl`}>
           <div className="flex flex-col h-full">
-            <div className="p-6 border-b border-slate-100">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-700">
               <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 <div className={`flex items-center gap-4 ${isCollapsed ? 'justify-center' : ''}`}>
                   <div className="relative">
@@ -80,13 +81,13 @@ export default function Layout() {
                   </div>
                   {!isCollapsed && (
                     <div>
-                      <h1 className="text-xl font-bold text-slate-900">Planillas SU</h1>
-                      <p className="text-xs text-slate-500">Gestión de Nómina</p>
+                      <h1 className="text-xl font-bold text-slate-900 dark:text-white">Planillas SU</h1>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Gestión de Nómina</p>
                     </div>
                   )}
                 </div>
                 {!isCollapsed && (
-                  <button onClick={() => setIsCollapsed(true)} className="p-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
+                  <button onClick={() => setIsCollapsed(true)} className="p-2.5 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400">
                     <PanelLeftClose className="w-5 h-5" />
                   </button>
                 )}
@@ -94,7 +95,7 @@ export default function Layout() {
             </div>
 
             {isCollapsed && (
-              <div className="p-4 border-b border-slate-100">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
                 <button onClick={() => setIsCollapsed(false)} className="w-full flex items-center justify-center p-3 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
                   <PanelLeft className="w-5 h-5" />
                 </button>
@@ -155,22 +156,22 @@ export default function Layout() {
               </NavLink>
             </nav>
 
-            <div className="p-4 border-t border-slate-100">
-              <div className="rounded-2xl p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700">
+              <div className="rounded-2xl p-4 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-slate-700 dark:to-slate-800 border border-cyan-100 dark:border-slate-600">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-11 h-11 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md">
                     {userInitials}
                   </div>
                   {!isCollapsed && (
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{userName}</p>
-                      <p className="text-xs text-slate-500 truncate">{userEmail}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
                     </div>
                   )}
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all text-sm font-medium bg-red-50 hover:bg-red-100 text-red-600"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all text-sm font-medium bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400"
                 >
                   <LogOutIcon className="w-4 h-4" />
                   {!isCollapsed && <span>Cerrar Sesión</span>}
@@ -187,9 +188,15 @@ export default function Layout() {
             <div className="flex flex-col h-full">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <FileSpreadsheet className="w-6 h-6 text-white" />
-                  </div>
+<div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <FileSpreadsheet className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">{currentPage}</h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
                   <div>
                     <h1 className="text-xl font-bold text-slate-900">Planillas SU</h1>
                     <p className="text-xs text-slate-500">Gestión de Nómina</p>
@@ -259,7 +266,7 @@ export default function Layout() {
       )}
 
       <div className={`transition-all duration-300 ${!isMobile && !sidebarVisible ? 'lg:ml-0' : !isMobile ? (isCollapsed ? 'lg:ml-24' : 'lg:ml-72') : ''}`}>
-        <header className="sticky top-0 z-30 backdrop-blur-2xl border-b transition-all duration-500 bg-white/80 border-slate-200/50 shadow-lg shadow-slate-900/5">
+        <header className="sticky top-0 z-30 backdrop-blur-2xl border-b transition-all duration-500 bg-white/80 dark:bg-slate-800/80 border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-900/5">
           <div className="flex items-center justify-between px-6 lg:px-8 h-18">
             <div className="flex items-center gap-4">
               {!sidebarVisible && !isMobile && (
@@ -288,6 +295,14 @@ export default function Layout() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"
+                title={isDark ? 'Modo claro' : 'Modo oscuro'}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              
               <div className="relative" ref={notifRef}>
                 <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-500">
                   <Bell className="w-5 h-5" />
@@ -295,27 +310,27 @@ export default function Layout() {
                 </button>
                 
                 {notifOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-96 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white border-slate-100">
-                    <div className="px-5 py-4 border-b border-slate-100">
-                      <h3 className="font-bold text-base text-slate-900">Notificaciones</h3>
-                      <p className="text-sm text-slate-500">{notifications.length} notificaciones sin leer</p>
+                  <div className="absolute right-0 top-full mt-3 w-96 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700">
+                    <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">Notificaciones</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{notifications.length} notificaciones sin leer</p>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.map(n => (
-                        <div key={n.id} className="flex items-start gap-4 p-5 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors">
+                        <div key={n.id} className="flex items-start gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors">
                           <div className={`w-12 h-12 ${n.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
                             <Bell className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{n.title}</p>
-                            <p className="text-sm text-slate-500 mt-1">{n.desc}</p>
-                            <p className="text-xs text-cyan-500 mt-2 font-medium">{n.time}</p>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{n.title}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{n.desc}</p>
+                            <p className="text-xs text-cyan-500 dark:text-cyan-400 mt-2 font-medium">{n.time}</p>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="px-5 py-4 bg-slate-50 text-center">
-                      <button className="text-sm text-cyan-600 font-semibold hover:underline">Ver todas las notificaciones</button>
+                    <div className="px-5 py-4 bg-slate-50 dark:bg-slate-700 text-center">
+                      <button className="text-sm text-cyan-600 dark:text-cyan-400 font-semibold hover:underline">Ver todas las notificaciones</button>
                     </div>
                   </div>
                 )}
@@ -334,10 +349,10 @@ export default function Layout() {
                 </button>
                 
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white border-slate-100">
-                    <div className="px-5 py-4 border-b border-slate-100">
-                      <p className="text-sm font-semibold text-slate-900">{userName}</p>
-                      <p className="text-sm text-slate-500">{userEmail}</p>
+                  <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl shadow-2xl border overflow-hidden z-50 bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700">
+                    <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{userName}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{userEmail}</p>
                     </div>
                     <div className="py-2">
                       {[
@@ -346,14 +361,14 @@ export default function Layout() {
                         { icon: Shield, label: 'Seguridad' },
                         { icon: HelpCircle, label: 'Ayuda' },
                       ].map((item, i) => (
-                        <button key={i} className="w-full flex items-center gap-3 px-5 py-3 transition-all text-slate-600 hover:bg-slate-50">
+                        <button key={i} className="w-full flex items-center gap-3 px-5 py-3 transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
                         </button>
                       ))}
                     </div>
-                    <div className="border-t border-slate-100">
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition-all">
+                    <div className="border-t border-slate-100 dark:border-slate-700">
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
                         <LogOutIcon className="w-4 h-4" />
                         <span className="text-sm font-semibold">Cerrar Sesión</span>
                         <ChevronRight className="w-4 h-4 ml-auto" />
