@@ -1,7 +1,7 @@
 import os
 import re
 import requests
-import xlrd
+import xlrd  
 from flask import Flask, request, jsonify
 from openpyxl import load_workbook
 from werkzeug.utils import secure_filename
@@ -14,7 +14,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 DNI_PATTERN = re.compile(r"DNI\s*(\d+)", re.IGNORECASE)
-IGNORAR_CONCEPTOS = {"REINTEGRO", "ESCOLARIDAD", "AGUINALDO", "DETALLE"}
+RD_PATTERN = re.compile(r"^(RD|R\.D\.|R\.M\.|RM|DS|LEY|DL)\s*[\d\-\./]+", re.IGNORECASE)
+IGNORAR_CONCEPTOS = {"REINTEGRO", "ESCOLARIDAD", "AGUINALDO", "DETALLE", "TOTAL", "SUBTOTAL"}
 
 
 def parsear_valor(v):
@@ -74,9 +75,9 @@ def extraer_empleados(filepath: str) -> list:
       ---------+-----------------+----------+--------
       HABERES  | Apellidos Nomb. | BASICA   | 0.03
       (merged) | (merged)        | DL19990  | 60.00
-               | CARGO/PUESTO    | TPH      | 19.20
-               | RD 150-93       | ...
-               | uu-01-0-005     |
+                | CARGO/PUESTO    | TPH      | 19.20
+                | RD 150-93       | ...
+                | uu-01-0-005     |
       DSCTOS   |                 | DL20530  | 3.80
       TOTAL HABERES              |          | 153.92
       TOTAL DESCUENTOS           |          | 76.27
@@ -151,11 +152,12 @@ def extraer_empleados(filepath: str) -> list:
                     dni_encontrado = extraer_dni(b)
                     if dni_encontrado:
                         emp["dni"] = dni_encontrado
-                    elif re.match(r"^(RD|RM|DS|LEY|DL|R\.D\.|R\.M\.)\s*[\d\-/]", b, re.IGNORECASE):
-                        emp["resolucion"] = b
+                    elif RD_PATTERN.match(b):
+                        if not emp["resolucion"]:
+                            emp["resolucion"] = b.strip()
                     elif re.match(r"^uu-", b, re.IGNORECASE):
                         emp["codigo"] = b
-                    elif not re.match(r"^(TOTAL|DSCTOS)", b, re.IGNORECASE):
+                    elif not re.match(r"^(TOTAL|DSCTOS|CARGO|PUESTO|DNI|RD)", b, re.IGNORECASE):
                         if emp["cargo"] is None:
                             emp["cargo"] = b
 
@@ -177,6 +179,99 @@ def extraer_empleados(filepath: str) -> list:
         i += 1
 
     return empleados
+
+
+def detectar_duplicados(empleados: list) -> dict:
+    """Detecta duplicados por nombre o DNI en la lista de empleados."""
+    por_dni = {}
+    por_nombre = {}
+    duplicados = []
+
+    for emp in empleados:
+        nombre_normalizado = emp.get("nombre", "").strip().upper()
+        dni = emp.get("dni")
+
+        if dni:
+            if dni in por_dni:
+                duplicados.append({
+                    "tipo": "dni",
+                    "dni": dni,
+                    "nombres": [por_dni[dni], emp.get("nombre")]
+                })
+            else:
+                por_dni[dni] = emp.get("nombre")
+
+        if nombre_normalizado:
+            if nombre_normalizado in por_nombre:
+                duplicados.append({
+                    "tipo": "nombre",
+                    "nombre": emp.get("nombre"),
+                    "dni": dni
+                })
+            else:
+                por_nombre[nombre_normalizado] = emp.get("nombre")
+
+    return {
+        "duplicados": duplicados,
+        "total_duplicados": len(duplicados),
+        "por_dni": list(por_dni.keys()),
+        "por_nombre": list(por_nombre.keys())
+    }
+
+
+def detectar_multiples_por_trabajador(empleados: list) -> dict:
+    """Detecta si hay múltiples planillas para el mismo trabajador con不同的 neto."""
+    por_dni = {}
+    por_nombre_key = {}
+
+    for emp in empleados:
+        dni = emp.get("dni")
+        nombre = emp.get("nombre", "").strip().upper()
+        liquido = emp.get("total_liquido")
+
+        key_dni = dni if dni else f"NOMBRE_{nombre}"
+        key_nombre = f"{nombre}_{dni or 'sin_dni'}"
+
+        if key_dni not in por_dni:
+            por_dni[key_dni] = []
+
+        por_dni[key_dni].append({
+            "nombre_original": emp.get("nombre"),
+            "nombre": nombre,
+            "dni": dni,
+            "liquido": liquido,
+            "nombre_key": key_nombre,
+            "haberes": emp.get("haberes", []),
+            "descuentos": emp.get("descuentos", [])
+        })
+
+    multiples = []
+    checked = set()
+
+    for key, items in por_dni.items():
+        if len(items) > 1:
+            first = items[0]
+            first_liq = first["liquido"] if first["liquido"] else 0
+            all_same = all(abs((i["liquido"] or 0) - first_liq) < 0.01 for i in items)
+
+            if not all_same:
+                for item in items:
+                    item_key = f"{item['nombre']}_{item['dni']}_{item['liquido']}"
+                    if item_key not in checked:
+                        checked.add(item_key)
+                        multiples.append({
+                            "nombre": item["nombre_original"],
+                            "dni": item["dni"],
+                            "liquido": item["liquido"],
+                            "count": len(items),
+                            "diferencia": abs(first_liq - (item["liquido"] or 0))
+                        })
+
+    return {
+        "multiples": multiples,
+        "total_multiples": len(multiples),
+        "has_multiples": len(multiples) > 0
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -213,11 +308,14 @@ def process_excel():
     try:
         empleados = extraer_empleados(filepath)
 
+        info_duplicados = detectar_duplicados(empleados)
+
         payload = {
             "mes": mes,
             "anio": anio,
             "total_empleados": len(empleados),
             "empleados": empleados,
+            "verificar_duplicados": True,
         }
 
         response = requests.post(
@@ -235,6 +333,8 @@ def process_excel():
                 "personal": len(empleados),
                 "planillas": len(empleados),
                 "errores": resp_data.get("errores", []),
+                "duplicados": info_duplicados.get("duplicados", []),
+                "total_duplicados": info_duplicados.get("total_duplicados", 0),
             })
         else:
             return jsonify({
@@ -262,15 +362,28 @@ def validate_excel():
     if not filename.lower().endswith(('.xlsx', '.xls')):
         return jsonify({"error": "Solo se aceptan archivos Excel (.xlsx, .xls)"}), 400
 
+    mes = request.form.get("mes", type=int)
+    anio = request.form.get("anio", type=int)
+
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
     try:
         empleados = extraer_empleados(filepath)
+        info_duplicados = detectar_duplicados(empleados)
+        info_multiples = detectar_multiples_por_trabajador(empleados)
         return jsonify({
             "valid": True,
             "total_empleados": len(empleados),
             "preview": empleados[:5],
+            "empleados": empleados,
+            "duplicados": info_duplicados.get("duplicados", []),
+            "total_duplicados": info_duplicados.get("total_duplicados", 0),
+            "multiples": info_multiples.get("multiples", []),
+            "total_multiples": info_multiples.get("total_multiples", 0),
+            "has_multiples": info_multiples.get("has_multiples", False),
+            "mes": mes,
+            "anio": anio,
         })
     except Exception as e:
         return jsonify({"valid": False, "error": str(e)}), 400

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { planillasApi, personalApi } from '../services/api'
-import { Plus, Trash2, X, Eye, FileSpreadsheet, DollarSign, ArrowDownToLine, ArrowUpFromLine, User, Calendar, Download, ChevronLeft, ChevronRight, Search, Loader2, Pencil, AlertCircle, Check, Clock, BadgeDollarSign, TrendingUp, Receipt, Filter, RotateCcw, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
+import { Plus, Trash2, X, Eye, FileSpreadsheet, DollarSign, ArrowDownToLine, ArrowUpFromLine, User, Calendar, Download, ChevronLeft, ChevronRight, Search, Loader2, Pencil, AlertCircle, Check, BadgeDollarSign, TrendingUp, Receipt, Filter, RotateCcw, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
 
 interface Personal {
   id: number
@@ -832,217 +832,219 @@ export default function Planillas() {
 
       {showDetail && detailPlanilla && (
         <div className="modal-overlay" onClick={() => setShowDetail(false)}>
-          <div className="modal-content w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col dark:bg-slate-800" onClick={e => e.stopPropagation()}>
-            <div className="px-5 py-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800">
+          <div className="modal-content w-[98vw] max-w-7xl max-h-[95vh] overflow-hidden flex flex-col dark:bg-slate-800" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-xl shadow-cyan-500/30 relative">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-xl shadow-cyan-500/30 relative">
                     {detailPlanilla.personal?.nombres?.charAt(0) || '?'}
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 rounded-full border-2 border-slate-800"></div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">
+                    <h3 className="text-xl font-bold text-white">
                       {detailPlanilla.personal?.apellidos} {detailPlanilla.personal?.nombres}
                     </h3>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
-                        <BadgeDollarSign className="w-3 h-3" />
-                        {detailPlanilla.personal?.dni || 'Sin DNI'}
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className="flex items-center gap-1.5 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-lg">
+                        <BadgeDollarSign className="w-4 h-4" />
+                        <span className="font-mono">{detailPlanilla.personal?.dni || 'Sin DNI'}</span>
                       </span>
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
-                        <Clock className="w-3 h-3" />
+                      <span className="flex items-center gap-1.5 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-lg">
+                        <Calendar className="w-4 h-4" />
                         {MESES[detailPlanilla.mes - 1]} {detailPlanilla.anio}
                       </span>
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/10 px-2.5 py-1 rounded-lg">
+                      <span className="flex items-center gap-1.5 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-lg">
+                        <User className="w-4 h-4" />
                         {detailPlanilla.personal?.puesto || 'Sin puesto'}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <button 
                     onClick={() => { setShowDetail(false); handleEdit(detailPlanilla.id) }}
-                    className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all"
+                    className="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center gap-2"
                     title="Editar planilla"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-5 h-5" />
+                    <span className="text-sm font-medium">Editar</span>
                   </button>
-                  <button onClick={() => setShowDetail(false)} className="p-2.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-all">
-                    <X className="w-5 h-5" />
+                  <button onClick={() => setShowDetail(false)} className="p-3 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-900">
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-2xl p-4 text-white shadow-lg shadow-emerald-500/25 overflow-hidden">
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-900">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/25 overflow-hidden">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
                   <div className="relative">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ArrowDownToLine className="w-4 h-4 text-emerald-100" />
-                      <span className="text-emerald-100 text-[10px] font-semibold uppercase tracking-wider">Total Haberes</span>
+                    <div className="flex items-center gap-3 mb-3">
+                      <ArrowDownToLine className="w-5 h-5 text-emerald-100" />
+                      <span className="text-emerald-100 text-xs font-semibold uppercase tracking-wider">Total Haberes</span>
                     </div>
-                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_haberes)}</p>
-                    <p className="text-emerald-200/80 text-[10px] mt-1">{detailPlanilla.ingresos?.length || 0} conceptos</p>
+                    <p className="text-3xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_haberes)}</p>
+                    <p className="text-emerald-200/80 text-sm mt-2">{detailPlanilla.ingresos?.length || 0} conceptos registrados</p>
                   </div>
                 </div>
-                <div className="relative bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 rounded-2xl p-4 text-white shadow-lg shadow-rose-500/25 overflow-hidden">
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+                <div className="relative bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 rounded-2xl p-5 text-white shadow-lg shadow-rose-500/25 overflow-hidden">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
                   <div className="relative">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ArrowUpFromLine className="w-4 h-4 text-rose-100" />
-                      <span className="text-rose-100 text-[10px] font-semibold uppercase tracking-wider">Total Descuentos</span>
+                    <div className="flex items-center gap-3 mb-3">
+                      <ArrowUpFromLine className="w-5 h-5 text-rose-100" />
+                      <span className="text-rose-100 text-xs font-semibold uppercase tracking-wider">Total Descuentos</span>
                     </div>
-                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_descuentos)}</p>
-                    <p className="text-rose-200/80 text-[10px] mt-1">{detailPlanilla.descuentos?.length || 0} deducciones</p>
+                    <p className="text-3xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_descuentos)}</p>
+                    <p className="text-rose-200/80 text-sm mt-2">{detailPlanilla.descuentos?.length || 0} deducciones</p>
                   </div>
                 </div>
-                <div className="relative bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/25 overflow-hidden ring-2 ring-cyan-400/30">
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full"></div>
+                <div className="relative bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/25 overflow-hidden ring-2 ring-cyan-400/30">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
                   <div className="relative">
-                    <div className="flex items-center gap-2 mb-2">
-                      <DollarSign className="w-4 h-4 text-cyan-100" />
-                      <span className="text-cyan-100 text-[10px] font-semibold uppercase tracking-wider">Pago Líquido</span>
+                    <div className="flex items-center gap-3 mb-3">
+                      <DollarSign className="w-5 h-5 text-cyan-100" />
+                      <span className="text-cyan-100 text-xs font-semibold uppercase tracking-wider">Pago Líquido</span>
                     </div>
-                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_liquido)}</p>
-                    <p className="text-cyan-200/80 text-[10px] mt-1 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Listo para pagar
+                    <p className="text-3xl font-bold tracking-tight">{formatCurrency(detailPlanilla.total_liquido)}</p>
+                    <p className="text-cyan-200/80 text-sm mt-2 flex items-center gap-1">
+                      <Check className="w-4 h-4" /> Listo para pagar
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-emerald-500 rounded-lg">
-                        <ArrowDownToLine className="w-3.5 h-3.5 text-white" />
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-b border-emerald-100 dark:border-emerald-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-500 rounded-xl">
+                        <ArrowDownToLine className="w-5 h-5 text-white" />
                       </div>
-                      <h4 className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">Ingresos y Haberes</h4>
-                      <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-semibold">
-                        {detailPlanilla.ingresos?.length || 0}
+                      <h4 className="font-bold text-emerald-700 dark:text-emerald-400 text-base">Ingresos y Haberes</h4>
+                      <span className="text-sm bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full font-semibold">
+                        {detailPlanilla.ingresos?.length || 0} conceptos
                       </span>
                     </div>
                   </div>
-                  <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
+                  <div className="p-4 space-y-3 max-h-72 overflow-y-auto">
                     {detailPlanilla.ingresos?.length === 0 ? (
-                      <div className="text-center py-8">
-                        <TrendingUp className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                        <p className="text-slate-400 dark:text-slate-500 text-sm">Sin ingresos registrados</p>
+                      <div className="text-center py-10">
+                        <TrendingUp className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Sin ingresos registrados</p>
                       </div>
                     ) : (
                       detailPlanilla.ingresos?.map((i: Ingreso) => (
-                        <div key={i.id} className="group flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-900/20 dark:to-transparent rounded-xl border border-emerald-100 dark:border-emerald-800 hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-sm transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
-                              <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <div key={i.id} className="group flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-900/20 dark:to-transparent rounded-xl border border-emerald-100 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
+                              <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                             </div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{i.tipo}</span>
+                            <span className="text-base font-semibold text-slate-700 dark:text-slate-200">{i.tipo}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">{formatCurrency(i.monto)}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-emerald-700 dark:text-emerald-400 text-lg">{formatCurrency(i.monto)}</span>
                             <button 
                               onClick={() => deleteIngreso(i.id)} 
-                              className="p-1 rounded hover:bg-red-100 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                              className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="px-3 pb-3 pt-2 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/20">
-                    <div className="flex gap-2">
+                  <div className="px-4 pb-4 pt-3 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/20">
+                    <div className="flex gap-3">
                       <input
                         type="text"
                         placeholder="Concepto (ej: Sueldo Base)"
-                        className="input text-xs py-2 flex-1 shadow-sm"
+                        className="input text-sm py-3 flex-1 shadow-sm"
                         value={ingresoForm.tipo}
                         onChange={e => setIngresoForm({ ...ingresoForm, tipo: e.target.value })}
                       />
                       <input
                         type="number"
                         placeholder="Monto"
-                        className="input text-xs py-2 w-24 shadow-sm"
+                        className="input text-sm py-3 w-32 shadow-sm"
                         value={ingresoForm.monto}
                         onChange={e => setIngresoForm({ ...ingresoForm, monto: e.target.value })}
                       />
                       <button
                         onClick={addIngreso}
                         disabled={!ingresoForm.tipo || !ingresoForm.monto}
-                        className="px-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                        className="px-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-red-500 rounded-lg">
-                        <ArrowUpFromLine className="w-3.5 h-3.5 text-white" />
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 border-b border-red-100 dark:border-red-800">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-500 rounded-xl">
+                        <ArrowUpFromLine className="w-5 h-5 text-white" />
                       </div>
-                      <h4 className="font-bold text-red-700 dark:text-red-400 text-sm">Descuentos y Deducciones</h4>
-                      <span className="text-[10px] bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full font-semibold">
-                        {detailPlanilla.descuentos?.length || 0}
+                      <h4 className="font-bold text-red-700 dark:text-red-400 text-base">Descuentos y Deducciones</h4>
+                      <span className="text-sm bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-3 py-1 rounded-full font-semibold">
+                        {detailPlanilla.descuentos?.length || 0} deducciones
                       </span>
                     </div>
                   </div>
-                  <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
+                  <div className="p-4 space-y-3 max-h-72 overflow-y-auto">
                     {detailPlanilla.descuentos?.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Receipt className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                        <p className="text-slate-400 dark:text-slate-500 text-sm">Sin descuentos registrados</p>
+                      <div className="text-center py-10">
+                        <Receipt className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Sin descuentos registrados</p>
                       </div>
                     ) : (
                       detailPlanilla.descuentos?.map((d: Descuento) => (
-                        <div key={d.id} className="group flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent rounded-xl border border-red-100 dark:border-red-800 hover:border-red-200 dark:hover:border-red-700 hover:shadow-sm transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
-                              <Receipt className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        <div key={d.id} className="group flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent rounded-xl border border-red-100 dark:border-red-800 hover:border-red-300 dark:hover:border-red-600 hover:shadow-md transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-xl flex items-center justify-center">
+                              <Receipt className="w-5 h-5 text-red-600 dark:text-red-400" />
                             </div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{d.tipo}</span>
+                            <span className="text-base font-semibold text-slate-700 dark:text-slate-200">{d.tipo}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-red-700 dark:text-red-400 text-sm">{formatCurrency(d.monto)}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-red-700 dark:text-red-400 text-lg">{formatCurrency(d.monto)}</span>
                             <button 
                               onClick={() => deleteDescuento(d.id)} 
-                              className="p-1 rounded hover:bg-red-100 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                              className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="px-3 pb-3 pt-2 border-t border-red-100 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20">
-                    <div className="flex gap-2">
+                  <div className="px-4 pb-4 pt-3 border-t border-red-100 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20">
+                    <div className="flex gap-3">
                       <input
                         type="text"
                         placeholder="Concepto (ej: AFP)"
-                        className="input text-xs py-2 flex-1 shadow-sm"
+                        className="input text-sm py-3 flex-1 shadow-sm"
                         value={descuentoForm.tipo}
                         onChange={e => setDescuentoForm({ ...descuentoForm, tipo: e.target.value })}
                       />
                       <input
                         type="number"
                         placeholder="Monto"
-                        className="input text-xs py-2 w-24 shadow-sm"
+                        className="input text-sm py-3 w-32 shadow-sm"
                         value={descuentoForm.monto}
                         onChange={e => setDescuentoForm({ ...descuentoForm, monto: e.target.value })}
                       />
                       <button
                         onClick={addDescuento}
                         disabled={!descuentoForm.tipo || !descuentoForm.monto}
-                        className="px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                        className="px-5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
